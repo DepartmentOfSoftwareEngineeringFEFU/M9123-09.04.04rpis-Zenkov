@@ -7,7 +7,7 @@
 
 <b>Научный руководитель:</b> Профессор Департамента ПИиИИ Артемьева Ирина Леонидовна
 
-# Инструкция по запуску
+# Инструкция по запуску на Windows
 1. Установить Python 3.10+
 2. git clone https://github.com/DepartmentOfSoftwareEngineeringFEFU/M9123-09.04.04rpis-Zenkov
 3. cd M9123-09.04.04rpis-Zenkov
