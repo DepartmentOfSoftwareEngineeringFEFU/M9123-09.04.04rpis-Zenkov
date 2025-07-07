@@ -11,8 +11,8 @@
 1. Установить Python 3.10+
 2. git clone https://github.com/DepartmentOfSoftwareEngineeringFEFU/M9123-09.04.04rpis-Zenkov
 3. cd M9123-09.04.04rpis-Zenkov
-4. python -m venv sporkienv // создание виртуального пространства
-5. sporkienv\Scripts\activate // запуск виртуального пространства
+4. python -m venv myenv // создание виртуального пространства
+5. myenv\Scripts\activate // запуск виртуального пространства
 6. pip install -r requirements.txt
 7. flask run
 8. Развёрнутая система доступна локально по адресу http://127.0.0.1:5000/ 
