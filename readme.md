@@ -8,8 +8,8 @@
 <b>Научный руководитель:</b> Профессор Департамента ПИиИИ Артемьева Ирина Леонидовна
 
 # Инструкция по запуску
-1. Установить Python 3.10
-2. git clone https://github.com/DepartmentOfSoftwareEngineeringFEFU/M9123-09.04.04rpis-Zenkov.git
+1. Установить Python 3.10+
+2. git clone https://github.com/DepartmentOfSoftwareEngineeringFEFU/M9123-09.04.04rpis-Zenkov
 3. cd M9123-09.04.04rpis-Zenkov
 4. python -m venv sporkienv // создание виртуального пространства
 5. sporkienv\Scripts\activate // запуск виртуального пространства
@@ -18,4 +18,4 @@
 8. Развёрнутая система доступна локально по адресу http://127.0.0.1:5000/ 
 
 <b>Логин администратора:</b> admin\
-<b>Пароль администратора по умолчанию:</b> admin
+<b>Пароль администратора по умолчанию:</b> без пароля
