@@ -11,7 +11,7 @@
 1. Установить Python 3.10+
 2. git clone https://github.com/DepartmentOfSoftwareEngineeringFEFU/M9123-09.04.04rpis-Zenkov
 3. cd M9123-09.04.04rpis-Zenkov
-4. python -m venv myenv
+4. py -m venv myenv
 5. myenv\Scripts\activate
 6. pip install -r requirements.txt
 7. flask run
