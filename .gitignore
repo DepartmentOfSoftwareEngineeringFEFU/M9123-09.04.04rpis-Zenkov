@@ -1,0 +1,7 @@
+.idea
+flask.exe
+__pycache__/
+controlles/__pycache__/
+models/__pycache__/
+static/guidebooks/
+templates/guidebooks/

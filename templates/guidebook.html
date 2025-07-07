@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% if book_name != None %}
+		<title>{{ book_name }} - Спорки</title>
+	{% else %}
+		<title>Пособие - Спорки</title>
+	{% endif %}
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/sidemenu.html' as sidemenu %}
+    {% import 'lib/flashes.html' as flashes %}
+    {% macro create_lesson_header(lessons, lesson_id) %}
+        {% set n = len(lessons) %}
+        {% for i in range(n) %}
+            {% if str(lessons.loc[i,"lesson_id"]) == str(lesson_id) %}
+                <h1>{{ lessons.loc[i,"lesson_name"] }}</h1>
+            {% endif %}
+        {% endfor %}
+    {% endmacro %}
+	<script src="../static/js/videoplayer.js"></script>
+</head>
+<body>
+{{ sidemenu.create_sidemenu(book_id, lessons, rules, len, rule_info) }}
+{% if user.is_authenticated and role_type == 'teacher' %}
+<div id="windowStudent" class="dialog">
+  <div class="dialog-content">
+      <form id="form_choose_student" action="{{ url_for('guidebook') }}?b={{book_id}}&l={{lesson_id}}" method="post">
+          <input type="hidden" name="form_choose" value="1">
+      </form>
+      <div class="dialog-header">
+          <span onclick="closeChStWindow()" class="close">&times;</span>
+          <h2>Выберите студента</h2>
+      </div>
+      <div class="dialog-body">
+          <label for="selectStudent">Студент:</label><br>
+          <select id="selectStudent" form="form_choose_student" name="student_id">
+              <option value='-1' disabled selected="selected">Выберите студента...</option>
+          {% if students is not none %}
+            {% set n = len(students) %}
+            {% for i in range(n) %}
+                <option value={{ students.loc[i,'student_id'] }}>
+                {{ students.loc[i,'user_name'] }}
+                </option>
+            {% endfor %}
+          {% endif %}
+          </select><br>
+          {% if student is not none %}
+              <p>Текущий студент: {{ student.loc[0, 'user_name'] }}</p>
+          {% else %}
+              <p>Текущий студент: нет</p>
+          {% endif %}
+      </div>
+      <div class="dialog-footer">
+          <input type="submit" form="form_choose_student" value="Загрузить ответы">
+      </div>
+  </div>
+</div>
+{% endif %}
+{% set words_n = 0 %}
+{% if words is not none %}
+	{% set words_n = len(words) %}
+{% endif %}
+<div id="windowDictionary" class="listWindow" style='display:none;'>
+	<div class="list">
+		<div class="row">
+			{% for i in range(words_n) %}
+			<div class="listWord" id="list_{{words.loc[i,"word_id"]}}" word_id='{{words.loc[i,"word_id"]}}' onclick='UpdateDictionaryWindow({{ words.loc[i,"word_id"] }})'>
+				<p>{{words.loc[i,"word_normal"]}}</p>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+  <div class="listContent" id="dictionaryContent">
+	<p>Выберите слово.</p>
+  </div>
+</div>
+
+{% set ubook_rules_n = 0 %}
+{% if ubook_rules is not none %}
+	{% set ubook_rules_n = len(ubook_rules) %}
+{% endif %}
+{% set ubook_words_n = 0 %}
+{% if ubook_words is not none %}
+	{% set ubook_words_n = len(ubook_words) %}
+{% endif %}
+{% if role_type == "student" %}
+<div id="windowUserbook" class="listWindow" style='display:none;'>
+	<div class="list">
+		<div class="row">
+			{% for i in range(ubook_rules_n) %}
+			<div class="listWord" id="ubook_entry_{{ubook_rules.loc[i,"entry_id"]}}" entry_id='{{ubook_rules.loc[i,"entry_id"]}}' onclick='UpdateUserbookWindow({{ ubook_rules.loc[i,"entry_id"] }}, 0)'>
+				<p>{{ubook_rules.loc[i,"entry_name"]}}</p>
+			</div>
+			{% endfor %}
+			{% for i in range(ubook_words_n) %}
+			<div class="listWord" id="ubook_word_{{ubook_words.loc[i,"word_id"]}}" word_id='{{ubook_words.loc[i,"word_id"]}}' onclick='UpdateUserbookWindow({{ ubook_words.loc[i,"word_id"] }}, 1)'>
+				<p>{{ubook_words.loc[i,"word_normal"]}}</p>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+  <div class="listContent" id="userbookContent">
+	<p>Выберите элемент картотеки.</p>
+  </div>
+</div>
+{% endif %}
+
+{% if role_type == "student" or role_type == "teacher" %}
+	{% set groups_n = 0 %}
+	{% if groups is not none %}
+		{% set groups_n = len(groups) %}
+	{% endif %}
+	<div id="chatWindow" class="chatWindow" style="display:none;">
+		<div class="list">
+			<div class="row">
+				{% for i in range(groups_n) %}
+				<div class="listWord" id="chat_{{groups.loc[i,"group_id"]}}" group_id='{{groups.loc[i,"group_id"]}}' onclick='UpdateChatWindow({{ groups.loc[i,"group_id"] }})'>
+					<p>{{groups.loc[i,"group_name"]}}</p>
+				</div>
+				{% endfor %}
+			</div>
+		</div>
+	  <div class="listContent" id="chatContent">
+		<div class="messagesList" id="messagesList">
+		
+		</div>
+		<div class="chatInput" id="chatInput" style="display:none;">
+			<textarea id="chatTextarea"></textarea>
+			<input type='button' class='chatButtonSend' value='Отправить' onclick='SendMessage()'>
+		</div>
+	  </div>
+	</div>
+	<input type='button' class='chatButton' value='Чат' onclick='OpenChat()'>
+{% endif %}
+
+<div id="dictPopup" class="popup"></div>
+<div id="main">
+    {{ topmenu.create_topmenu(false, user, role_type, true) }}
+    <audio class="audio-player-default" id='audio_default'></audio>
+    {% if lesson_id is none %}
+        Произошла ошибка :с
+    {% else %}
+        {{ create_lesson_header(lessons, lesson_id) }}
+        {% if lesson_entries is not none %}
+        {% set lesson_entry_n = len(lesson_entries) %}
+        {% for i in range(lesson_entry_n) %}
+            <div class="entry" id="{{ lesson_entries.loc[i,"entry_id"] }}">
+                {% if lesson_entries.loc[i,"entry_type_name"] == "rule" or lesson_entries.loc[i,"entry_type_name"] == "rule_nic" %}
+                    {% set rule_info_n = len(rule_info) %}
+                    {% for j in range(rule_info_n) %}
+                        {% if lesson_entries.loc[i,"entry_id"] == rule_info.loc[j,"entry_id"] %}
+                            {% set align = rule_info.loc[j,"header_align"] %}
+                            {% set size = rule_info.loc[j,"header_size"] %}
+                            <h2 class="entry-title title-{{ align }} title-{{ size }}">{{ lesson_entries.loc[i,"entry_name"]|safe }}</h2>
+							{% if is_editing_answers %} <a class='aButton' href='{{url_for('edit_entry')}}?b={{book_id}}&e={{lesson_entries.loc[i,"entry_id"]}}'><button>Открыть в конструкторе</button></a>{% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    {# {% include 'guidebooks/'+book_id+'/entries/'+str(lesson_entries.loc[i,"entry_id"])+'/contents.html' %} #}
+					{% for key, value in entry_contents.items() %}
+                        {% if key == lesson_entries.loc[i,"entry_id"] %}
+                            {{ value|safe }}
+                        {% endif %}
+                    {% endfor %}
+                {% elif lesson_entries.loc[i,"entry_type_name"] == "task_text"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_txar"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_numb"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_chbx"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_radi"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_audi"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_diag"
+                        or lesson_entries.loc[i,"entry_type_name"] == "task_ordr"
+                        %}
+                    <h2 class="entry-title">{{ lesson_entries.loc[i,"entry_name"]|safe }}</h2>
+					{% if is_editing_answers %} <a class='aButton' href='{{url_for('edit_entry')}}?b={{book_id}}&e={{lesson_entries.loc[i,"entry_id"]}}'><button>Открыть в конструкторе</button></a>{% endif %}
+					{% if lesson_entries.loc[i,"entry_type_name"] == "task_text" 
+						or lesson_entries.loc[i,"entry_type_name"] == "task_txar"
+						or lesson_entries.loc[i,"entry_type_name"] == "task_numb"
+						or lesson_entries.loc[i,"entry_type_name"] == "task_chbx"
+						or lesson_entries.loc[i,"entry_type_name"] == "task_radi"
+						or lesson_entries.loc[i,"entry_type_name"] == "task_ordr"
+					%}
+						{% if is_editing_answers %}
+						{% if lesson_entries.loc[i,"is_autocheck"] %}
+							<p><b>Режим редактирования: для сохранения корректного ответа, введите/выберите/переставите нужные ответы и нажмите кнопку "Отправить".</b></p>
+							<p><b>При сохранении ответа, будет активирована автоматическая проверка задания.</b></p>
+							<br>
+						{% else %}
+							<p><b>Режим редактирования: для задания данного типа возможно добавление правильных ответов.</b></p>
+							<p><b>Для этого необходимо установить галочку на "Автоматическая проверка" при редактировании задания в конструкторе.</b></p>
+							<br>
+						{% endif %}
+						{% endif %}
+					{% endif %}
+                    {% if lesson_entries.loc[i,"entry_type"] == "task_audi" %}
+                        <p>
+                        Справка по выполнению задания на говорение:
+                        <button class="button-notice" id="buttonNotice_{{ lesson_entries.loc[i,"entry_id"] }}_-1"
+                        onclick='openNotice({{ lesson_entries.loc[i,"entry_id"] }}, -1)'>Развернуть</button>
+                        </p>
+                        <div class="notice-div" id="divNotice_{{ lesson_entries.loc[i,"entry_id"] }}_-1" style="display: none;">
+                            <p>
+                                Для выполнения задания на говорение загрузите аудиофайл, нажав на кнопку "Обзор".
+                                После этого вы можете прослушать выбранный файл.
+                                Если вы удовлетворены выбранным файлом, нажмите кнопку "Отправить" для сохранения ответа.
+                                Поддерживаемые форматы: wav, mp3, ogg, webm, mov.
+                            </p>
+                            <p>
+                                Вы можете записать аудио в сторонней программе или
+                                на сайте (например, <a href="https://online-voice-recorder.com/" target="_blank">https://online-voice-recorder.com/</a>).
+                                Если вы открыли пособие на мобильном устройстве, при загрузке аудио вам будет предложено
+                                записать аудио при помощи диктофона на устройстве.
+                            </p>
+                        </div>
+                    {% elif lesson_entries.loc[i,"entry_type_name"] == "task_diag" %}
+                        {{ flashes.create_flashes_list() }}
+                        <form id="form_choose_partner_{{ lesson_entries.loc[i,"entry_id"] }}" action="{{ url_for('save_answer') }}" method="post">
+                            <input type="hidden" name="form_choose_speaker" value='1'>
+							<input type="hidden" name="book_id" value={{ book_id }}>
+                            <input type="hidden" name="entry_id" value={{ lesson_entries.loc[i,"entry_id"] }}>
+                            <input type="hidden" name="entry_type" value={{ lesson_entries.loc[i,"entry_type"] }}>
+                            <input type="hidden" name="return_url" value="{{url_for('guidebook')}}?b={{ str(book_id) }}&l={{ str(lesson_id) }}#{{ lesson_entries.loc[i,"entry_id"] }}">
+                        </form>
+                        <form id="form_update_{{ lesson_entries.loc[i,"entry_id"] }}" action="{{ url_for('save_answer') }}" method="post">
+                            <input type="hidden" name="form_update" value='1'>
+                            <input type="hidden" name="book_id" value={{ book_id }}>
+							<input type="hidden" name="entry_id" value={{ lesson_entries.loc[i,"entry_id"] }}>
+                            <input type="hidden" name="entry_type" value={{ lesson_entries.loc[i,"entry_type"] }}>
+                            <input type="hidden" name="return_url" value="{{url_for('guidebook')}}?b={{ str(book_id) }}&l={{ str(lesson_id) }}#{{ lesson_entries.loc[i,"entry_id"] }}">
+                        </form>
+                        <p>
+                        Справка по выполнению задания на диалог:
+                        <button class="button-notice" id="buttonNotice_{{ lesson_entries.loc[i,"entry_id"] }}_-1"
+                        onclick='openNotice({{ lesson_entries.loc[i,"entry_id"] }}, -1)'>Развернуть</button>
+                        </p>
+                        <div class="notice-div" id="divNotice_{{ lesson_entries.loc[i,"entry_id"] }}_-1" style="display: none;">
+                            <p>
+                                <strong>Шаг 1.</strong> Перед выполнением данного задания вам необходимо выбрать из списка студента, с которым вы хотите работать в паре.
+                                Студент, которого вы выбрали, также должен выбрать вас в качестве пары.
+                            </p>
+                            <p>
+                                <strong>Шаг 2.</strong> Помимо этого, вы можете выбрать предпочтительный номер (1 или 2).
+                                Если у вас и вашего собеседника будут выбраны одинаковые номера, то они будут выбраны случайным образом.
+                            </p>
+                            <p>
+                                <strong>Шаг 3.</strong> После этого нажмите кнопку "Выбрать".
+                                Если у студента которого вы выбрали уже есть пара,
+                                то вам нужно будет выбрать другого студента (см. Шаг 1).
+                            </p>
+                            <p>
+                                Если пара для задания успешно установлена, вы сможете приступить к выполнению задания.
+                                В зависимости от выбранного номера говорящего, вам будет доступна возможность для загрузки аудио
+                                для говорящего номер 1 или 2 (процесс загрузки аудиофайла аналогичен заданиям на говорение).
+                                Возможно, вам потребуется обновить страницу перед тем, как появится возможность отвечать.
+                                Для этого вы можете нажать кнопку "Обновить".
+                            </p>
+                             <p>
+                                <strong>После того, как вам станет доступно выполнение задания, вы не сможете поменять собеседника для данного задания!</strong>
+                            </p>
+                        </div>
+                    {% else %}
+                        <form id="form_save_{{ lesson_entries.loc[i,"entry_id"] }}" action="{{ url_for('save_answer') }}" method="post">
+                        <input type="hidden" name="book_id" value={{ book_id }}>
+						<input type="hidden" name="entry_id" value={{ lesson_entries.loc[i,"entry_id"] }}>
+                        <input type="hidden" name="entry_type" value={{ lesson_entries.loc[i,"entry_type"] }}>
+                        <input type="hidden" name="return_url" value="{{ url_for('guidebook') }}?b={{ str(book_id) }}&l={{ str(lesson_id) }}#{{ lesson_entries.loc[i,"entry_id"] }}">
+                        </form>
+                    {% endif %}
+
+                    {% for key, value in entry_contents.items() %}
+                        {% if key == lesson_entries.loc[i,"entry_id"] %}
+                            {{ value|safe }}
+                        {% endif %}
+                    {% endfor %}
+                    {% for key, value in task_can_submit.items() %}
+                        {% if key == lesson_entries.loc[i,"entry_id"] %}
+                            {% if (is_editing_answers or value == true and role_type == 'student')
+                             and lesson_entries.loc[i,"entry_type_name"] != "task_audi"
+                             and lesson_entries.loc[i,"entry_type_name"] != "task_diag" %}
+                                <input type="submit" form="form_save_{{ lesson_entries.loc[i,"entry_id"] }}" value="Отправить">
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+					{% set student_id = -1%}
+					{% if role_type == 'student'%}
+						{% set student_id = role_id %}
+					{% elif role_type == 'teacher' %}
+						{% set student_id = student.loc[0, 'student_id'] %}
+					{% endif %}
+					{% if student_id != -1 and not is_editing_answers %}
+						<div class='commentSection' id="section_{{lesson_entries.loc[i,"entry_id"]}}_{{student_id}}" entry_id={{lesson_entries.loc[i,"entry_id"]}} student_id={{student_id}}>
+							<div class="messagesList">
+								<p>Загрузка сообщений...</p>
+							</div>
+							<div class="commentInput">
+								<textarea class="messageTextarea"></textarea>
+								<input type='button' class='chatButtonSend' value='Отправить' onclick='SendComment({{lesson_entries.loc[i,"entry_id"]}}, {{student_id}})'>
+							</div>
+						</div>
+					{% endif %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        {% endif %}
+    {% endif %}
+</div>
+<script src="../static/js/audio_record.js"></script>
+<script src="../static/js/guidebook.js"></script>
+<script src="../static/js/dictionary.js"></script>
+<script src="../static/js/chat.js"></script>
+<script src="../static/js/comments.js"></script>
+<script>
+    const uid = {{ user.id }}
+	const lesson_id = {{ lesson_id }}
+</script>
+</body>

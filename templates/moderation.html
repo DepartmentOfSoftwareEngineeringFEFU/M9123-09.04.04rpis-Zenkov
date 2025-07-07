@@ -1,0 +1,166 @@
+<html>
+<head>
+    <title>Модерация - Спорки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/flashes.html' as flashes %}
+    {% import 'lib/screenturn.html' as screenturn %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+
+    {{ screenturn.create_screenturn_message() }}
+	
+	{% set orgs_len = len(organizations) %}
+	{% if organization_id != None %}
+	{% set members_len = len(members) %}
+	{% set groups_len = len(groups) %}
+	{% for i in range(members_len) %}
+		{% if members.loc[i,"is_moderator"] == 0 %}
+        <form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_remove_member_{{ members.loc[i,"member_id"] }} method="post">
+            <input type="hidden" name="member_id"
+               value={{ members.loc[i,"member_id"] }}>
+            <input type="hidden" name="remove_member" value=1>
+        </form>
+		{% endif %}
+    {% endfor %}
+	<h1>Члены организации</h1>
+    <table class="table-constructor" id="members_table">
+        <tr>
+            <th>Логин</th>
+            <th>ФИО</th>
+			<th>Действие</th>
+        </tr>
+        {% for i in range(members_len) %}
+            <tr>
+                <td>{{ members.loc[i,"user_login"] }}</td>
+				<td>{{ members.loc[i,"user_name"] }}</td>
+				<td><input form="form_remove_member_{{ members.loc[i,'member_id'] }}" type="submit" value="Исключить"
+					{% if members.loc[i,"is_moderator"] %} disabled="" {% endif %}><br></td>
+            </tr>
+        {% endfor %}
+    </table>
+	{% for i in range(groups_len) %}
+		<form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_remove_group_{{ groups.loc[i,"group_id"] }} method="post">
+            <input type="hidden" name="group_id"
+               value={{ groups.loc[i,"group_id"] }}>
+            <input type="hidden" name="remove_group" value=1>
+        </form>
+		<form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_add_teacher_{{ groups.loc[i,"group_id"] }} method="post">
+            <input type="hidden" name="group_id"
+               value={{ groups.loc[i,"group_id"] }}>
+            <input type="hidden" name="add_teacher" value=1>
+        </form>
+		<form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_add_student_{{ groups.loc[i,"group_id"] }} method="post">
+            <input type="hidden" name="group_id"
+               value={{ groups.loc[i,"group_id"] }}>
+            <input type="hidden" name="add_student" value=1>
+        </form>
+		<form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_remove_teacher_{{ groups.loc[i,"group_id"] }} method="post">
+            <input type="hidden" name="group_id"
+               value={{ groups.loc[i,"group_id"] }}>
+            <input type="hidden" name="remove_teacher" value=1>
+        </form>
+		<form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_remove_student_{{ groups.loc[i,"group_id"] }} method="post">
+            <input type="hidden" name="group_id"
+               value={{ groups.loc[i,"group_id"] }}>
+            <input type="hidden" name="remove_student" value=1>
+        </form>
+    {% endfor %}
+	<form action="{{url_for('moderation')}}?o={{organization_id}}" id=form_add_group method="post">
+        <input type="hidden" name="organization_id"
+            value={{ organization_id }}>
+        <input type="hidden" name="add_group" value=1>
+    </form>
+	<h1>Группы</h1>
+    <table class="table-constructor" id="orgs_table">
+        <tr>
+            <th>Группа</th>
+			<th>Преподаватели</th>
+			<th>Студенты</th>
+            <th>Действие</th>
+        </tr>
+        {% for i in range(groups_len) %}
+            <tr>
+                <td>{{ groups.loc[i,"group_name"] }}</td>
+				<td>
+					{% set teachers = groups.loc[i,"teachers"] %}
+					{% set teachers_len = len(teachers) %}
+					{% if teachers_len > 0 %}
+					<select form=form_remove_teacher_{{ groups.loc[i,"group_id"] }} name="teacher_id"  autocomplete="off">
+						{% for j in range(teachers_len) %}
+							<option value="{{ teachers.loc[j,'teacher_id'] }}">{{ teachers.loc[j,'user_name'] }}</option>
+						{% endfor %}
+						<input form="form_remove_teacher_{{ groups.loc[i,'group_id'] }}" type="submit" value="Исключить преподавателя"><br>
+					</select>
+					<br>
+					{% endif %}
+					<select form=form_add_teacher_{{ groups.loc[i,"group_id"] }} name="member_id"  autocomplete="off">
+						<option value="-1" selected="selected">Выберите пользователя</option>
+						{% for j in range(members_len) %}
+							<option value="{{ members.loc[j,'member_id'] }}">{{ members.loc[j,'user_name'] }}</option>
+						{% endfor %}
+						<input form="form_add_teacher_{{ groups.loc[i,'group_id'] }}" type="submit" value="Добавить преподавателя"><br>
+					</select>
+				</td>
+				<td>
+					{% set students = groups.loc[i,"students"] %}
+					{% set students_len = len(students) %}
+					{% if students_len > 0 %}
+					<select form=form_remove_student_{{ groups.loc[i,"group_id"] }} name="student_id"  autocomplete="off">
+						{% for j in range(students_len) %}
+							<option value="{{ students.loc[j,'student_id'] }}">{{ students.loc[j,'user_name'] }}</option>
+						{% endfor %}
+						<input form="form_remove_student_{{ groups.loc[i,'group_id'] }}" type="submit" value="Исключить студента"><br>
+					</select>
+					<br>
+					{% endif %}
+					<select form=form_add_student_{{ groups.loc[i,"group_id"] }} name="member_id"  autocomplete="off">
+						<option value="-1" selected="selected">Выберите пользователя</option>
+						{% for j in range(members_len) %}
+							<option value="{{ members.loc[j,'member_id'] }}">{{ members.loc[j,'user_name'] }}</option>
+						{% endfor %}
+						<input form="form_add_student_{{ groups.loc[i,'group_id'] }}" type="submit" value="Добавить студента"><br>
+					</select>
+				</td>
+				<td>
+                    <input form="form_remove_group_{{ groups.loc[i,'group_id'] }}" type="submit" value="Удалить"><br>
+                </td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td><input form="form_add_group" type="text" name="group_name" placeholder="Номер группы" autocomplete="off"></td>
+			<td>Нет</td>
+			<td>Нет</td>
+            <td>
+                <input form="form_add_group" type="submit" value="Создать группу">
+            </td>
+        </tr>
+    </table>
+	{% else %}
+	<table class="table-constructor" id="organizations_table">
+        <tr>
+            <th>Название</th>
+            <th>Адрес</th>
+			<th>Доступ</th>
+			<th>Действие</th>
+        </tr>
+        {% for i in range(orgs_len) %}
+            <tr>
+                <td>{{ organizations.loc[i,"organization_name"] }}</td>
+                <td>{{ organizations.loc[i,"organization_address"] }}</td>
+				<td>{% if organizations.loc[i,"organization_access"] == 1 %} Есть {% else %} Нет {% endif %}</td>
+				<td>
+					<form action="{{url_for('moderation')}}?o={{ organizations.loc[i,"organization_id"] }}" method="post">
+						<input type="submit" value="Модерация">
+					</form>
+				</td>
+            </tr>
+        {% endfor %}
+    </table>
+	{% endif %}
+</div>
+</body>

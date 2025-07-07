@@ -1,0 +1,139 @@
+<html>
+<head>
+    <title>Редактирование слова - Спорки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    <link href="../static/css/quill.snow.min.css" rel="stylesheet">
+    <script src="../static/js/quill.min.js" type="text/javascript"></script>
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/flashes.html' as flashes  %}
+        {% macro create_file_control(images, videos, audios) %}
+        {% set images_n = len(images) %}
+        {% set videos_n = len(videos) %}
+		{% set audios_n = len(audios) %}
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id="form_delete_image" method="post">
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="delete_image" value=1>
+        </form>
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id="form_delete_video" method="post">
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="delete_video" value=1>
+        </form>
+		<form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id="form_delete_audio" method="post">
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="delete_audio" value=1>
+        </form>
+        <div class="editor-select-media">
+        <select form="form_delete_image" id="select-image" name="file">
+                <option value="" disabled selected>Выберите изображение</option>
+            {% for i in range(images_n) %}
+                <option value={{ images[i] }}>{{ images[i] }}</option>
+            {% endfor %}
+        </select><br>
+        <input type="button" onclick="insertToEditor({{ book_id }}, 'image')" value="Вставить">
+        <input form="form_delete_image" type="submit" value="Удалить">
+        <br>
+        </div>
+        <br>
+        <div class="editor-select-media">
+        <select form="form_delete_video" id="select-video" name="file">
+                <option value="" disabled selected>Выберите видео</option>
+            {% for i in range(videos_n) %}
+                <option value={{ videos[i] }}>{{ videos[i] }}</option>
+            {% endfor %}
+        </select><br>
+        <input type="button" onclick="insertToEditor({{ book_id }}, 'video')" value="Вставить">
+        <input form="form_delete_video" type="submit" value="Удалить">
+        </div>
+		<br>
+		<div class="editor-select-media">
+        <select form="form_delete_audio" id="select-audio" name="file">
+                <option value="" disabled selected>Выберите аудио</option>
+            {% for i in range(audios_n) %}
+                <option value={{ audios[i] }}>{{ audios[i] }}</option>
+            {% endfor %}
+        </select><br>
+        <input type="button" onclick="insertToEditor({{ book_id }}, 'audio')" value="Вставить">
+        <input form="form_delete_audio" type="submit" value="Удалить">
+        </div>
+        <br>
+        <form action="{{url_for('upload_file')}}" method=post enctype=multipart/form-data>
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type=file name=file>
+			<br><label for="filename">Имя файла:</label>
+			<input type="text" name="filename" id="filename" autocomplete='off'>
+            <br><input type=submit value='Загрузить файл'>
+        </form>
+    {% endmacro %}
+    {% macro create_form_edit(book_id, lesson_id, word_id) %}
+        <form action="{{url_for('edit_word')}}?b={{book_id}}&l={{lesson_id}}&w={{ word_id }}" id=form_save method="post">
+            <input type="hidden" name="save" value=1>
+			<input type="hidden" name="word_id" value="{{ word_id }}">
+            <input type="hidden" id="entry_contents" name="entry_contents" value="">
+        </form>
+        <br>
+		<h1>Понятие: {{word.loc[0,"word_normal"]}}, {{word.loc[0,"word_speech_name"]}}</h1>
+        <br>
+		<form id="add_synonym" action="{{url_for('edit_word')}}?b={{book_id}}&l={{lesson_id}}&w={{ word_id }}" method="post">
+        <input type="hidden" name="lesson_id" value="{{lesson_id}}">
+		<input type="hidden" name="reference_word_id" value="{{word_id}}">
+        <input type="hidden" name="add_synonym" value=1>
+    </form>
+	<table class="table-constructor" id="dictionary_table">
+        <tr>
+            <th>Синоним</th>
+            <th>Часть речи</th>
+            <th>Действие</th>
+        </tr>
+		{% set synonyms_n = len(synonyms) %}
+        {% for i in range(synonyms_n) %}
+            <tr>
+                <td>{{ synonyms.loc[i,"word_normal"] }}</td>
+                <td>{{ synonyms.loc[i,"word_speech_name"] }}</td>
+				<td>
+					<form action="{{url_for('edit_word')}}?b={{book_id}}&l={{lesson_id}}&w={{ word_id }}" method="post">
+						<input type="hidden" name="remove_synonym" value=1>
+						<input type="hidden" name="word_id" value="{{ synonyms.loc[i,"word_id"] }}">
+						<input type="submit" value="Удалить">
+					</form>
+				</td>
+            </tr>
+        {% endfor %}
+		<tr>
+			<td><input form="add_synonym" type="text" name="word" placeholder="Понятие" autocomplete="off"></td>
+			<td>Будет определена автоматически.</td>
+			<td><input form="add_synonym" type="submit" value="Добавить синоним"></td>
+		</tr>
+    </table>
+	<br>
+        <div>
+            <button id="insert-table">Вставить таблицу</button>
+            <button id="insert-row-above">Вставить строку выше</button>
+            <button id="insert-row-below">Вставить строку ниже</button>
+            <button id="insert-column-left">Вставить колонку слева</button>
+            <button id="insert-column-right">Вставить колонку справа</button>
+            <button id="delete-row">Удалить строку</button>
+            <button id="delete-column">Удалить колонку</button>
+            <button id="delete-table">Удалить таблицу</button>
+        </div>
+        <div id="editor">
+            {% include 'guidebooks/'+str(book_id)+'/dictionary/'+str(word_id)+'/contents.html' %}
+        </div>
+        <script src="../static/js/edit_entry.js"></script>
+        <input type="submit" value="Сохранить" onclick="setHTML()">
+        <input type="button" onclick="location.href='{{ url_for('edit_dictionary') }}?b={{book_id}}&l={{ lesson_id }}'" value="Вернуться">
+    {% endmacro %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+	{{ create_file_control(images, videos, audios) }}
+    {{ create_form_edit(book_id, lesson_id, word_id) }}
+	<script src="../static/js/edit_entry.js"></script>
+</div>
+</body>

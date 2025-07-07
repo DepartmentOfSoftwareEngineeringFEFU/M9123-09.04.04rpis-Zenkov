@@ -1,0 +1,207 @@
+<html>
+<head>
+    <title>Панель управления - Спорки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/flashes.html' as flashes %}
+    {% import 'lib/screenturn.html' as screenturn %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+    {% set users_n = len(users) %}
+    {% set orgs_n = len(organizations) %}
+    {% for i in range(users_n) %}
+		<form action="{{url_for('control_panel')}}" id=form_save_{{ users.loc[i,"user_id"] }} method="post">
+            <input type="hidden" name="user_id"
+               value={{ users.loc[i,"user_id"] }}>
+            <input type="hidden" name="save" value=1>
+        </form>
+		<form action="{{url_for('control_panel')}}" id=form_reset_{{ users.loc[i,"user_id"] }} method="post">
+            <input type="hidden" name="user_id"
+               value={{ users.loc[i,"user_id"] }}>
+            <input type="hidden" name="reset" value=1>
+        </form>
+	    <form action="{{url_for('control_panel')}}" id=form_add_member_{{ users.loc[i,"user_id"] }} method="post">
+            <input type="hidden" name="user_id"
+               value={{ users.loc[i,"user_id"] }}>
+            <input type="hidden" name="add_member" value=1>
+        </form>
+		<form action="{{url_for('control_panel')}}" id=form_remove_member_{{ users.loc[i,"user_id"] }} method="post">
+            <input type="hidden" name="user_id"
+               value={{ users.loc[i,"user_id"] }}>
+            <input type="hidden" name="remove_member" value=1>
+        </form>
+		{% if i > 0 %}
+        <form action="{{url_for('control_panel')}}" id=form_delete_{{ users.loc[i,"user_id"] }} method="post">
+            <input type="hidden" name="user_id"
+               value={{ users.loc[i,"user_id"] }}>
+            <input type="hidden" name="delete" value=1>
+        </form>
+		{% endif %}
+    {% endfor %}
+    <form action="{{url_for('register_post')}}" id=form_add method="post">
+        <input type="hidden" name="user_password" value="">
+        <input type="hidden" name="add" value=1>
+    </form>
+
+    {{ screenturn.create_screenturn_message() }}
+	
+	<h1>Пользователи</h1>
+    <table class="table-constructor" id="users_table">
+        <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>ФИО</th>
+			<th>Организации</th>
+			<th>Редактор</th>
+            <th>Действие</th>
+        </tr>
+        {% for i in range(users_n) %}
+            <tr>
+                <td>{{ users.loc[i,"user_id"] }}</td>
+                <td>{{ users.loc[i,"user_login"] }}</td>
+                <td><input form=form_save_{{ users.loc[i,"user_id"] }} type="text" name="user_name" value="{{ users.loc[i,'user_name'] }}" placeholder="ФИО" autocomplete="off"></td>
+                <td>
+					{% set user_orgs = users.loc[i,"organizations"] %}
+					{% set user_orgs_len = len(user_orgs) %}
+					{% if user_orgs_len > 0 %}
+					<select form=form_remove_member_{{ users.loc[i,"user_id"] }} name="member_id"  autocomplete="off">
+						{% for j in range(user_orgs_len) %}
+							<option value="{{ user_orgs.loc[j,'member_id'] }}">{{ user_orgs.loc[j,'organization_name'] }}</option>
+						{% endfor %}
+						<input form="form_remove_member_{{ users.loc[i,"user_id"] }}" type="submit" value="Удалить из организации"><br>
+					</select>
+					<br>
+					{% endif %}
+					<select form=form_add_member_{{ users.loc[i,"user_id"] }} name="organization_id"  autocomplete="off">
+						<option value="-1" selected="selected">Выберите организацию</option>
+						{% for j in range(orgs_n) %}
+							<option value="{{ organizations.loc[j,'organization_id'] }}">{{ organizations.loc[j,'organization_name'] }}</option>
+						{% endfor %}
+						<input form="form_add_member_{{ users.loc[i,"user_id"] }}" type="submit" value="Добавить в организацию"><br>
+					</select>
+				</td>
+				<td>
+					<select form=form_save_{{ users.loc[i,"user_id"] }} name="user_is_editor"  autocomplete="off">
+						<option value="0" {% if users.loc[i,'is_editor'] == 0 %}selected="selected"{% endif %}>Нет</option>
+						<option value="1" {% if users.loc[i,'is_editor'] == 1 %}selected="selected"{% endif %}>Да</option>
+					</select>
+				</td>
+				<td>
+					<input form="form_save_{{ users.loc[i,'user_id'] }}" type="submit" value="Сохранить"><br>
+                    <input form="form_reset_{{ users.loc[i,'user_id'] }}" type="submit" value="Сбросить пароль"><br>
+                    {% if i > 0 %}<input form="form_delete_{{ users.loc[i,'user_id'] }}" type="submit" value="Удалить"><br>{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td>Будет назначен автоматически</td>
+            <td><input form="form_add" type="text" name="user_login" placeholder="Логин" autocomplete="off"></td>
+            <td><input form="form_add" type="text" name="user_name" placeholder="ФИО" autocomplete="off"></td>
+            <td>Нет</td>
+			<td>
+				<select form=form_add name="user_is_editor"  autocomplete="off">
+					<option value="0" selected="selected">Нет</option>
+					<option value="1">Да</option>
+				</select>
+			</td>
+			<td>
+                <input form="form_add" type="submit" value="Добавить пользователя">
+            </td>
+            </tr>
+    </table>
+    {% for i in range(orgs_n) %}
+        <form action="{{url_for('control_panel')}}" id=form_save_org_{{ organizations.loc[i,"organization_id"] }} method="post">
+            <input type="hidden" name="org_id"
+               value={{ organizations.loc[i,"organization_id"] }}>
+            <input type="hidden" name="save_org" value=1>
+        </form>
+        <form action="{{url_for('control_panel')}}" id=form_delete_org_{{ organizations.loc[i,"organization_id"] }} method="post">
+            <input type="hidden" name="org_id"
+               value={{ organizations.loc[i,"organization_id"] }}>
+            <input type="hidden" name="delete_org" value=1>
+        </form>
+		<form action="{{url_for('control_panel')}}" id=form_add_moderator_{{ organizations.loc[i,"organization_id"] }} method="post">
+            <input type="hidden" name="org_id"
+               value={{ organizations.loc[i,"organization_id"] }}>
+            <input type="hidden" name="add_moderator" value=1>
+        </form>
+		<form action="{{url_for('control_panel')}}" id=form_remove_moderator_{{ organizations.loc[i,"organization_id"] }} method="post">
+            <input type="hidden" name="org_id"
+               value={{ organizations.loc[i,"organization_id"] }}>
+            <input type="hidden" name="remove_moderator" value=1>
+        </form>
+    {% endfor %}
+    <form action="{{url_for('control_panel')}}" id=form_add_org method="post">
+        <input type="hidden" name="add_org" value=1>
+    </form>
+	<h1>Организации</h1>
+    <table class="table-constructor" id="orgs_table">
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+			<th>Адрес</th>
+			<th>Доступ</th>
+			<th>Модераторы</th>
+            <th>Действие</th>
+        </tr>
+        {% for i in range(orgs_n) %}
+            <tr>
+                <td>{{ organizations.loc[i,"organization_id"] }}</td>
+                <td><input form=form_save_org_{{ organizations.loc[i,"organization_id"] }} type="text" name="org_name" value="{{ organizations.loc[i,'organization_name'] }}" placeholder="Название" autocomplete="off"></td>
+                <td><input form=form_save_org_{{ organizations.loc[i,"organization_id"] }} type="text" name="org_address" value="{{ organizations.loc[i,'organization_address'] }}" placeholder="Адрес" autocomplete="off"></td>
+				<td>
+					<select form=form_save_org_{{ organizations.loc[i,"organization_id"] }} name="org_access"  autocomplete="off">
+						<option value="0" {% if organizations.loc[i,'organization_access'] == 0 %}selected="selected"{% endif %}>Нет</option>
+						<option value="1" {% if organizations.loc[i,'organization_access'] == 1 %}selected="selected"{% endif %}>Да</option>
+					</select>
+				</td>
+				<td>
+					{% set moderators = organizations.loc[i,"moderators"] %}
+					{% set moderators_len = len(moderators) %}
+					{% if moderators_len > 0 %}
+					<select form=form_remove_moderator_{{ organizations.loc[i,"organization_id"] }} name="moderator_id"  autocomplete="off">
+						{% for j in range(moderators_len) %}
+							<option value="{{ moderators.loc[j,'moderator_id'] }}">{{ moderators.loc[j,'user_login'] }}</option>
+						{% endfor %}
+						<input form="form_remove_moderator_{{ organizations.loc[i,'organization_id'] }}" type="submit" value="Удалить модератора"><br>
+					</select>
+					<br>
+					{% endif %}
+					<select form=form_add_moderator_{{ organizations.loc[i,"organization_id"] }} name="member_id"  autocomplete="off">
+						<option value="-1" selected="selected">Выберите пользователя</option>
+						{% set members = organizations.loc[i,"members"] %}
+						{% set members_len = len(members) %}
+						{% for j in range(members_len) %}
+							<option value="{{ members.loc[j,'member_id'] }}">{{ members.loc[j,'user_login'] }}</option>
+						{% endfor %}
+						<input form="form_add_moderator_{{ organizations.loc[i,'organization_id'] }}" type="submit" value="Добавить модератора"><br>
+					</select>
+				</td>
+				<td>
+                    <input form="form_save_org_{{ organizations.loc[i,'organization_id'] }}" type="submit" value="Сохранить"><br>
+                    <input form="form_delete_org_{{ organizations.loc[i,'organization_id'] }}" type="submit" value="Удалить"><br>
+                </td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td>Будет назначен автоматически</td>
+            <td><input form="form_add_org" type="text" name="org_name" placeholder="Название" autocomplete="off"></td>
+			<td><input form="form_add_org" type="text" name="org_address" placeholder="Адрес" autocomplete="off"></td>
+			<td>
+				<select form=form_add_org name="org_access"  autocomplete="off">
+					<option value="0" selected="selected">Нет</option>
+					<option value="1">Да</option>
+				</select>
+			</td>
+			<td>Нет</td>
+            <td>
+                <input form="form_add_org" type="submit" value="Добавить организацию">
+            </td>
+            </tr>
+    </table>
+</div>
+</body>

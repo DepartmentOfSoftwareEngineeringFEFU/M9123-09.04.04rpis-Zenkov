@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Главная - Спорки</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/sidemenu.html' as sidemenu %}
+    {% import 'lib/flashes.html' as flashes %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+	{{ flashes.create_flashes_list() }}
+	<form action="{{url_for('index')}}" id=group_select method="post">
+        <input type="hidden" name="group_selected" value=1>
+    </form>
+	{% set groups_len = len(groups) %}
+	<b>Группа: </b>
+	<select form=group_select name="group_info"  autocomplete="off">
+		<option value="-1">Выберите группу...</option>
+		{% for i in range(groups_len) %}
+			<option value="{{ groups.loc[i,'organization_id'] }},{{ groups.loc[i,'role_id'] }},{{ groups.loc[i,'role_type'] }}">
+				{{ groups.loc[i,'group_name'] }} | {% if groups.loc[i,'role_type'] == 'student' %} студент 
+				{% elif groups.loc[i,'role_type'] == 'teacher' %} преподаватель 
+				{% else %} ОШИБКА
+				{% endif %} | {{ groups.loc[i,'organization_name'] }}
+			</option>
+		{% endfor %}
+	</select> <input form=group_select type="submit" value="Выбрать"><br><br>
+	{% if has_access == True %}
+	{% set books_len = len(books) %}
+	{% if books_len < 1%}
+		<p>Нет доступных пособий.</p>
+	{% else %}
+	<table class="table-constructor" id="books_table">
+        <tr>
+            <th>Пособия</th>
+        </tr>
+        {% for i in range(books_len) %}
+            <tr>
+                <td><a href={{url_for("guidebook") + "?b=" + str(books.loc[i,"book_id"])}}><button class='bookLink'>{{ books.loc[i,"book_name"] }}</button></a></td>
+            </tr>
+        {% endfor %}
+    </table>
+	{% endif %}
+	{% endif %}
+</body>

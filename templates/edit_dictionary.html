@@ -1,0 +1,56 @@
+<html>
+<head>
+    <title>Редактор словаря - Спорки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/sidemenu.html' as sidemenu %}
+    {% import 'lib/flashes.html' as flashes %}
+    {% import 'lib/screenturn.html' as screenturn %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+    {% set words_n = len(dict_words) %}
+	{% set pos_n = len(parts_of_speech) %}
+	
+    <form id="add_word" action="{{url_for('edit_dictionary')}}?b={{book_id}}&l={{lesson_id}}" method="post">
+        <input type="hidden" name="lesson_id" value="{{lesson_id}}">
+        <input type="hidden" name="add_word" value=1>
+    </form>
+
+    {{ screenturn.create_screenturn_message() }}
+
+    <table class="table-constructor" id="dictionary_table">
+        <tr>
+            <th>Понятие</th>
+            <th>Часть речи</th>
+            <th>Действие</th>
+        </tr>
+
+        {% for i in range(words_n) %}
+            <tr>
+                <td>{{ dict_words.loc[i,"word_normal"] }}</td>
+                <td>{{ dict_words.loc[i,"word_speech_name"] }}</td>
+				<td>
+					<form action="{{url_for('edit_word')}}?b={{book_id}}&l={{lesson_id}}&w={{ dict_words.loc[i,"word_id"] }}" method="post">
+						<input type="submit" value="Редактировать">
+					</form>
+					<form action="{{url_for('edit_dictionary')}}?b={{book_id}}&l={{ lesson_id }}" method="post">
+						<input type="hidden" name="remove_word" value=1>
+						<input type="hidden" name="word_id" value="{{ dict_words.loc[i,"word_id"] }}">
+						<input type="submit" value="Удалить">
+					</form>
+				</td>
+            </tr>
+        {% endfor %}
+		<tr>
+			<td><input form="add_word" type="text" name="word" placeholder="Понятие" autocomplete="off"></td>
+			<td>Будет определена автоматически.</td>
+			<td><input form="add_word" type="submit" value="Добавить в словарь"></td>
+		</tr>
+    </table>
+	<input type="button" onclick="location.href='{{ url_for('constructor') }}?b={{ book_id }}'" value="Вернуться">
+</div>
+</body>

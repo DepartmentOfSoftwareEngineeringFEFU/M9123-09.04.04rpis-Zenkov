@@ -1,0 +1,268 @@
+<html>
+<head>
+    <title>Конструктор - Спорки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/sidemenu.html' as sidemenu %}
+    {% import 'lib/flashes.html' as flashes %}
+    {% import 'lib/screenturn.html' as screenturn %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+    {% set lesson_n = len(lessons) %}
+    {% set entry_n = len(lesson_entries) %}
+	
+	{% if book_id != None %}
+    <script src="../static/js/constructor.js"></script>
+    <form action="{{url_for('constructor')}}?b={{book_id}}" id=form_save method="post">
+        <input type="hidden" name="save" value=1>
+        {% for i in range(lesson_n) %}
+            <input type="hidden" name="index_l_{{ lessons.loc[i,"lesson_id"] }}"
+                   value="{{ lessons.loc[i,"lesson_index"] }}">
+        {% endfor %}
+        {% for j in range(entry_n) %}
+            <input type="hidden" name="index_e_{{ lesson_entries.loc[j,"entry_id"] }}"
+                   value="{{ lesson_entries.loc[j,"lesson_entry_index"] }}">
+        {% endfor %}
+    </form>
+    <form id="add_lesson" action="{{url_for('constructor')}}?b={{book_id}}" method="post">
+        <input type="hidden" name="add_lesson" value=1>
+    </form>
+    {% for i in range(lesson_n) %}
+        <form id="add_entry_l_{{ lessons.loc[i,"lesson_id"] }}" action="{{url_for('constructor')}}?b={{book_id}}" method="post">
+            <input type="hidden" name="lesson_id" value="{{ lessons.loc[i,"lesson_id"] }}">
+            <input type="hidden" name="add_entry" value=1>
+        </form>
+    {% endfor %}
+    {% for j in range(entry_n) %}
+        <form id="form_remove_entry_{{ lesson_entries.loc[j,"entry_id"] }}" action="{{url_for('constructor')}}?b={{book_id}}" method="post">
+            <input type="hidden" name="entry_id" value="{{ lesson_entries.loc[j,"entry_id"] }}">
+            <input type="hidden" name="remove_entry" value=1>
+        </form>
+    {% endfor %}
+
+    {{ screenturn.create_screenturn_message() }}
+
+    <table class="table-constructor" id="lesson_table">
+        <tr>
+            <th>Раскрыть содержимое</th>
+            <th>Название</th>
+            <th></th>
+            <th></th>
+            <th>Положение</th>
+        </tr>
+
+        {% set lesson_index = {'value' : 1} %}
+        {% set lesson_n = len(lessons) %}
+        {% set entry_n = len(lesson_entries) %}
+        {% for i in range(lesson_n) %}
+            <tr class="lesson_table lesson_title" id="titl_l_{{ lessons.loc[i,"lesson_id"] }}"
+                index="{{ lessons.loc[i,"lesson_index"] }}">
+            <td><input type="button" value="+" onclick="expandLesson('l_{{ lessons.loc[i,"lesson_id"] }}')"></td>
+            <td>
+                <input type="text" form="form_save" name="name_l_{{ lessons.loc[i,"lesson_id"] }}"
+                       value="{{ lessons.loc[i,"lesson_name"] }}">
+            </td>
+
+            {% set count_entries = {'value' : 0} %}
+            {% for j in range(entry_n) %}
+                {% if lesson_entries.loc[j,"lesson_id"] == lessons.loc[i,"lesson_id"] %}
+                    {% if count_entries.update({'value' : count_entries['value'] + 1}) %}{% endif %}
+                {% endif %}
+            {% endfor %}
+            <td>Количество записей: {{ count_entries['value'] }}</td>
+            <td>
+                <form action="{{url_for('constructor')}}?b={{book_id}}" method="post">
+                    <input type="hidden" name="remove_lesson" value=1>
+                    <input type="hidden" name="lesson_id" value="{{ lessons.loc[i,"lesson_id"] }}">
+					<input type="button" onclick="location.href='{{ url_for('edit_dictionary')
+									+ '?b=' + str(book_id)
+									+ '&l=' + str(lessons.loc[i,"lesson_id"]) }}'" value="Словарь">
+                    <input type="submit" value="Удалить">
+                </form>
+            </td>
+            <td>
+                <input type="button" class="lesson_move up" value="/\"
+                       onclick="moveLessonUp('l_{{ lessons.loc[i,"lesson_id"] }}')"><br>
+                <input type="button" class="lesson_move down" value="\/"
+                       onclick="moveLessonDown('l_{{ lessons.loc[i,"lesson_id"] }}')">
+            </td>
+            </tr>
+
+            <tr class="lesson_table lesson_contents" id="cont_l_{{ lessons.loc[i,"lesson_id"] }}" hidden>
+            <td></td>
+            <td colspan="4">
+                <table class="table-constructor" id="tabl_l_{{ lessons.loc[i,"lesson_id"] }}">
+                    <tr>
+                        <th>Название</th>
+                        <th></th>
+                        <th></th>
+                        <th>Положение</th>
+                    </tr>
+
+                    {% set entry_index = {'value' : 1} %}
+                    {% for j in range(entry_n) %}
+                        {% if lesson_entries.loc[j,"lesson_id"] == lessons.loc[i,"lesson_id"] %}
+                        <tr class="lesson_table lesson_entry" id='e_{{ lesson_entries.loc[j,"entry_id"] }}'
+                            parent_lesson_id='l_{{ lesson_entries.loc[j,"lesson_id"] }}'
+                            index="{{ lesson_entries.loc[j,"entry_index"] }}">
+                        <td>
+                            {{ lesson_entries.loc[j,"entry_name"] }}<br>
+                            {% if lesson_entries.loc[j,"entry_type_name"] == 'rule' %}
+                                Тип: теория
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_text' %}
+                                Тип: задание (текст)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_txar' %}
+                                Тип: задание (эссе)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_numb' %}
+                                Тип: задание (число)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_chbx' %}
+                                Тип: задание (несколько вариантов)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_radi' %}
+                                Тип: задание (один вариант)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_audi' %}
+                                Тип: задание (говорение)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_diag' %}
+                                Тип: задание (диалог)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'task_ordr' %}
+                                Тип: задание (порядок)
+                            {% elif lesson_entries.loc[j,"entry_type_name"] == 'rule_nic' %}
+                                Тип: теория (не в картотеке)
+                            {% else %}
+                                Тип: неизвестно
+                            {% endif %}
+                        </td>
+                        <td>
+                            <input type="button" onclick="location.href='{{ url_for('edit_entry')
+									+ '?b=' + str(book_id)
+									+ '&e=' + str(lesson_entries.loc[j,"entry_id"]) }}'" value="Изменить">
+                        </td>
+                        <td>
+                            <input form="form_remove_entry_{{ lesson_entries.loc[j,"entry_id"] }}" type="submit" value="Удалить">
+                        </td>
+                        <td>
+                            <input type="button" value="/\"
+                                   onclick="moveEntryUp('e_{{ lesson_entries.loc[j,"entry_id"] }}')"><br>
+                            <input type="button" value="\/"
+                                   onclick="moveEntryDown('e_{{ lesson_entries.loc[j,"entry_id"] }}')">
+                        </td>
+                        </tr>
+                        {% if entry_index.update({'value' : entry_index['value'] + 1}) %}{% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <tr class="lesson_table lesson_entry add" parent_lesson_id="l_{{ lessons.loc[i,"lesson_id"] }}"
+                        index="">
+                        <td colspan="4">
+                            <input form="add_entry_l_{{ lessons.loc[i,"lesson_id"] }}" type="hidden" name="lesson_entry_index"
+                                   value="{{ entry_index['value'] }}">
+                            <input form="add_entry_l_{{ lessons.loc[i,"lesson_id"] }}" type="submit" value="Добавить запись">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        {% if lesson_index.update({'value' : lesson_index['value'] + 1}) %}{% endif %}
+        {% endfor %}
+        <tr class="lesson_table lesson_title add" index="{{ lesson_index['value'] }}">
+            <th colspan="5">
+                <input form="add_lesson" type="hidden" name="lesson_index" value="{{ lesson_index['value'] }}">
+                <input form="add_lesson" type="submit" value="Добавить урок">
+            </th>
+        </tr>
+        <tr>
+            <th colspan="5"><input form="form_save" type="submit" value="Сохранить изменения"></th>
+        </tr>
+    </table>
+	{% else %}
+	{% set books_len = len(books) %}
+	<form action="{{url_for('constructor')}}" id=form_add_guidebook method="post">
+        <input type="hidden" name="add_guidebook" value=1>
+    </form>
+	<table class="table-constructor" id="books_table">
+        <tr>
+            <th>Пособие</th>
+			<th>Видимость</th>
+			{% if user.is_admin %}<th>Редакторы</th>{% endif %}
+			<th>Действие</th>
+        </tr>
+        {% for i in range(books_len) %}
+            <tr>
+                <td><input form=form_save_book_{{ books.loc[i,"book_id"] }} type="text" name="book_name" value="{{ books.loc[i,'book_name'] }}" placeholder="Название пособия" autocomplete="off"></td>
+				{% if user.is_admin %}
+					<td>
+						<select form=form_save_book_{{ books.loc[i,"book_id"] }} name="book_visible"  autocomplete="off">
+							<option value="0" {% if books.loc[i,'book_visible'] == 0 %}selected="selected"{% endif %}>Не доступно</option>
+							<option value="1" {% if books.loc[i,'book_visible'] == 1 %}selected="selected"{% endif %}>Доступно</option>
+						</select>
+					</td>				
+				{% elif user.is_editor %}
+					<td>{% if books.loc[i,"book_visible"] == 1 %} Доступно {% else %} Недоступно {% endif %}</td>
+				{% endif %}
+				{% if user.is_admin %}
+					<td>
+						{% set editors_len = len(editors) %}
+						{% set book_editors = books.loc[i,"editors"] %}
+						{% set book_editors_len = len(book_editors) %}
+						{% if book_editors_len > 0 %}
+						<form action="{{url_for('constructor')}}" id=form_remove_editor_{{ books.loc[i,"book_id"] }} method="post">
+							<input type="hidden" name="book_id"
+							   value={{ books.loc[i,"book_id"] }}>
+							<input type="hidden" name="remove_editor" value=1>
+						</form>
+						<select form=form_remove_editor_{{ books.loc[i,"book_id"] }} name="editor_id"  autocomplete="off">
+							{% for j in range(book_editors_len) %}
+								<option value="{{ book_editors.loc[j,'editor_id'] }}">{{ book_editors.loc[j,'user_name'] }}</option>
+							{% endfor %}
+							<input form="form_remove_editor_{{ books.loc[i,'book_id'] }}" type="submit" value="Исключить редактора"><br>
+						</select>
+						<br>
+						{% endif %}
+						<form action="{{url_for('constructor')}}" id=form_add_editor_{{ books.loc[i,"book_id"] }} method="post">
+							<input type="hidden" name="book_id"
+							   value={{ books.loc[i,"book_id"] }}>
+							<input type="hidden" name="add_editor" value=1>
+						</form>
+						<select form=form_add_editor_{{ books.loc[i,"book_id"] }} name="user_id"  autocomplete="off">
+							<option value="-1" selected="selected">Выберите пользователя</option>
+							{% for j in range(editors_len) %}
+								<option value="{{ editors.loc[j,'user_id'] }}">{{ editors.loc[j,'user_name'] }}</option>
+							{% endfor %}
+							<input form="form_add_editor_{{ books.loc[i,'book_id'] }}" type="submit" value="Добавить редактора"><br>
+						</select>
+					</td>
+				{% endif %}
+				<td>
+					<form id=form_save_book_{{ books.loc[i,"book_id"] }} action="{{url_for('constructor')}}" method="post">
+						<input type="hidden" name="update_guidebook" value=1>
+						<input type="hidden" name="book_id" value="{{ books.loc[i,"book_id"] }}">
+						<input type="submit" value="Сохранить">
+					</form>
+					<form action="{{url_for('constructor')}}?b={{ books.loc[i,"book_id"] }}" method="post">
+						<input type="submit" value="Редактировать">
+					</form>
+					<form action="{{url_for('constructor')}}" method="post">
+						<input type="hidden" name="remove_guidebook" value=1>
+						<input type="hidden" name="book_id" value="{{ books.loc[i,"book_id"] }}">
+						<input type="submit" value="Удалить">
+					</form>
+				</td>
+            </tr>
+        {% endfor %}
+			{% if user.is_editor %}
+		    <tr>
+                <td><input form="form_add_guidebook" type="text" name="book_name" placeholder="Название пособия" autocomplete="off"></td>
+				<td>-</td>
+				{% if user.is_admin %}<td>-</td>{% endif %}
+				<td>
+					<input form="form_add_guidebook" type="submit" value="Создать пособие">
+				</td>
+            </tr>
+			{% endif %}
+    </table>
+	{% endif %}
+</div>
+</body>

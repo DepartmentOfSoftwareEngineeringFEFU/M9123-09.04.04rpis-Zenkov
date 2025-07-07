@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>Личный кабинет - Спорки</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/flashes.html' as flashes %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+    <p>Логин: {{ user.login }}</p>
+    <p>ФИО: {{ user.name }}</p>
+    <form action={{ url_for("user_account") }} method="post">
+        <input type="hidden" name="change" value=1>
+        <input type="hidden" name="user_id" value={{ user.id }}>
+        <label for="input_password_old">Старый пароль</label><br>
+        <input class="login-input" id="input_password_old" type="password" name="user_password" value="" placeholder="Введите старый пароль..." autocomplete="off">
+        <br><label for="input_password_new">Новый пароль</label><br>
+        <input class="login-input" id="input_password_new" type="password" name="user_password_new" value="" placeholder="Введите новый пароль...">
+        <br><label for="input_password_new_repeat">Повторите новый пароль</label><br>
+        <input class="login-input" id="input_password_new_repeat" type="password" name="user_password_new_repeat" value="" placeholder="Введите новый пароль...">
+        <br><input type="submit" value="Сменить пароль">
+    </form>
+    <br>
+</div>
+</body>

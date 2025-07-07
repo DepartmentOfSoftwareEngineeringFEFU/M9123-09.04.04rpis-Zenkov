@@ -1,0 +1,354 @@
+<html>
+<head>
+    <title>Редактирование записи - Спорки</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    <link href="../static/css/quill.snow.min.css" rel="stylesheet">
+    <script src="../static/js/quill.min.js" type="text/javascript"></script>
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/flashes.html' as flashes  %}
+    {% macro create_file_control(images, videos, audios) %}
+        {% set images_n = len(images) %}
+        {% set videos_n = len(videos) %}
+		{% set audios_n = len(audios) %}
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id="form_delete_image" method="post">
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="delete_image" value=1>
+        </form>
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id="form_delete_video" method="post">
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="delete_video" value=1>
+        </form>
+		<form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id="form_delete_audio" method="post">
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="delete_audio" value=1>
+        </form>
+        <div class="editor-select-media">
+        <select form="form_delete_image" id="select-image" name="file">
+                <option value="" disabled selected>Выберите изображение</option>
+            {% for i in range(images_n) %}
+                <option value={{ images[i] }}>{{ images[i] }}</option>
+            {% endfor %}
+        </select><br>
+        <input type="button" onclick="insertToEditor({{ book_id }}, 'image')" value="Вставить">
+        <input form="form_delete_image" type="submit" value="Удалить">
+        <br>
+        </div>
+        <br>
+        <div class="editor-select-media">
+        <select form="form_delete_video" id="select-video" name="file">
+                <option value="" disabled selected>Выберите видео</option>
+            {% for i in range(videos_n) %}
+                <option value={{ videos[i] }}>{{ videos[i] }}</option>
+            {% endfor %}
+        </select><br>
+        <input type="button" onclick="insertToEditor({{ book_id }}, 'video')" value="Вставить">
+        <input form="form_delete_video" type="submit" value="Удалить">
+        </div>
+		<br>
+		<div class="editor-select-media">
+        <select form="form_delete_audio" id="select-audio" name="file">
+                <option value="" disabled selected>Выберите аудио</option>
+            {% for i in range(audios_n) %}
+                <option value={{ audios[i] }}>{{ audios[i] }}</option>
+            {% endfor %}
+        </select><br>
+        <input type="button" onclick="insertToEditor({{ book_id }}, 'audio')" value="Вставить">
+        <input form="form_delete_audio" type="submit" value="Удалить">
+        </div>
+        <br>
+        <form action="{{url_for('upload_file')}}" method=post enctype=multipart/form-data>
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type=file name=file>
+			<br><label for="filename">Имя файла:</label>
+			<input type="text" name="filename" id="filename" autocomplete='off'>
+            <br><input type=submit value='Загрузить файл'>
+        </form>
+    {% endmacro %}
+    {% macro create_form_edit(entry_type) %}
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id=form_save method="post">
+            <input type="hidden" name="save" value=1>
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="entry_type" value="{{ entry_type }}">
+            <input class="fullwidth"
+                   type="text" name="entry_name" value="{{ entries.loc[entry_i['value'], "entry_name"] }}" autocomplete='off'><br>
+            {% if entry_type == 'rule' or entry_type == 'rule_nic' %}
+                <label for="in_contents">В картотеке:</label>
+                <input type="checkbox" id="in_contents" name="entry_in_contents" value=1
+                {% if entries.loc[entry_i['value'], "entry_type_name"] == 'rule' %}
+                    checked
+                {% endif %}
+                >
+                <br>
+                <label for="in_contents_main">В содержании (Пособие):</label>
+                <input type="checkbox" id="in_contents_main" name="in_contents_main" value=1
+                {% if in_contents_main is defined and in_contents_main is not none and in_contents_main == 'True' %}
+                    checked
+                {% endif %}
+                >
+                <br>
+                <label for="header_align">Расположение заголовка:</label>
+                <select id="header_align" name="header_align">
+                    <option value="left"
+                        {% if header_align is defined and header_align is not none and header_align == 'left' %}
+                            selected
+                        {% endif %}
+                    >Слева</option>
+                    <option value="center"
+                        {% if header_align is defined and header_align is not none and header_align == 'center' %}
+                            selected
+                        {% endif %}
+                    >По центру</option>
+                </select>
+                <br>
+                <label for="header_size">Размер заголовка:</label>
+                <select id="header_size" name="header_size">
+                    <option value="normal"
+                        {% if header_size is defined and header_size is not none and header_size == 'normal' %}
+                            selected
+                        {% endif %}
+                    >Обычный</option>
+                    <option value="small"
+                        {% if header_size is defined and header_size is not none and header_size == 'small' %}
+                            selected
+                        {% endif %}
+                    >Маленький</option>
+                </select>
+            {% endif %}
+            {% if entry_type == 'task_text' %}
+				{#
+                <label for="check">Автоматическая проверка:</label>
+                <input type="checkbox" id="check" name="check" value=1
+                {% if check is defined and check is not none and check == 'True' %}
+                    checked
+                {% endif %}
+                ><br>
+				#}
+                <label for="text_size">Размер текстового поля:</label>
+                <input type="number" min="1" max="99" id="text_size" name="size"
+                    {% if size is defined and size is not none %}
+                       value={{ size }}
+                    {% else %}
+                       value="10"
+                    {% endif %}
+                ><br>
+                <label for="text_size">Максимальное количество символов:</label>
+                <input type="number" min="1" max="99" id="text_maxlength" name="maxlength"
+                    {% if maxlength is defined and maxlength is not none %}
+                       value={{ maxlength }}
+                    {% else %}
+                       value="10"
+                    {% endif %}
+                ><br>
+				<label for="points">Максимальное количество баллов:</label>
+                <input type="number" min="1" max="99" id="points" name="points"
+                    {% if points is defined and points is not none %}
+                       value={{ points }}
+                    {% else %}
+                       value="5"
+                    {% endif %}
+                >
+            {% elif entry_type == 'task_txar' %}
+				{#
+                <label for="check">Автоматическая проверка:</label>
+                <input type="checkbox" id="check" name="check" value=1
+                {% if check is defined and check is not none and check == 'True' %}
+                    checked
+                {% endif %}
+                ><br>
+				#}
+                <label for="txar_rows">Количество строк (высота текстового поля):</label>
+                <input type="number" min="1" max="99" id="txar_rows" name="rows"
+                    {% if rows is defined and rows is not none %}
+                       value={{ rows }}
+                    {% else %}
+                       value="8"
+                    {% endif %}
+                ><br>
+				<label for="points">Максимальное количество баллов:</label>
+                <input type="number" min="1" max="99" id="points" name="points"
+                    {% if points is defined and points is not none %}
+                       value={{ points }}
+                    {% else %}
+                       value="5"
+                    {% endif %}
+                >
+            {% elif entry_type == 'task_numb' %}
+				{#
+                <label for="check">Автоматическая проверка:</label>
+                <input type="checkbox" id="check" name="check" value=1
+                {% if check is defined and check is not none and check == 'True' %}
+                    checked
+                {% endif %}
+                ><br>
+				#}
+                <label for="numb_min">Минимальное значение:</label>
+                <input type="number" min="1" max="99" id="numb_min" name="min"
+                    {% if min is defined and min is not none %}
+                       value={{ min }}
+                    {% else %}
+                       value="1"
+                    {% endif %}
+                ><br>
+                <label for="numb_max">Максимальное значение:</label>
+                <input type="number" min="1" max="99" id="numb_max" name="max"
+                    {% if max is defined and max is not none %}
+                       value={{ max }}
+                    {% else %}
+                       value="99"
+                    {% endif %}
+                ><br>
+				<label for="points">Максимальное количество баллов:</label>
+                <input type="number" min="1" max="99" id="points" name="points"
+                    {% if points is defined and points is not none %}
+                       value={{ points }}
+                    {% else %}
+                       value="5"
+                    {% endif %}
+                >
+            {% elif entry_type == 'task_diag' %}
+                <label for="diag_replies">Количество ответов:</label>
+                <input type="number" min="1" max="20" id="diag_replies" name="replies"
+                    {% if replies is defined and replies is not none %}
+                       value={{ replies }}
+                    {% else %}
+                       value="4"
+                    {% endif %}
+                ><br>
+				<label for="points">Максимальное количество баллов:</label>
+                <input type="number" min="1" max="99" id="points" name="points"
+                    {% if points is defined and points is not none %}
+                       value={{ points }}
+                    {% else %}
+                       value="5"
+                    {% endif %}
+                >
+            {% elif entry_type == 'task_chbx' or entry_type == 'task_radi' or entry_type == 'task_ordr' %}
+                {#
+				<label for="check">Автоматическая проверка:</label>
+                <input type="checkbox" id="check" name="check" value=1
+                {% if check is defined and check is not none and check == 'True' %}
+                    checked
+                {% endif %}
+                ><br>
+				#}
+				<label for="points">Максимальное количество баллов:</label>
+                <input type="number" min="1" max="99" id="points" name="points"
+                    {% if points is defined and points is not none %}
+                       value={{ points }}
+                    {% else %}
+                       value="5"
+                    {% endif %}
+                >
+			{% elif entry_type == 'task_audi' %}
+				<label for="points">Максимальное количество баллов:</label>
+                <input type="number" min="1" max="99" id="points" name="points"
+                    {% if points is defined and points is not none %}
+                       value={{ points }}
+                    {% else %}
+                       value="5"
+                    {% endif %}
+                >
+            {% endif %}
+            <input type="hidden" id="entry_contents" name="entry_contents" value="">
+        </form>
+        {% if entry_type == 'task_text' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_txar' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_numb' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_chbx' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_radi' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_audi' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_diag' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% elif entry_type == 'task_ordr' %}
+        <button id="button-notice" onclick="insertNotice()">Вставить справку</button>
+        <input type="button" onclick="insertAnswer()" value="Вставить поле для ответа">
+        {% endif %}
+        <br>
+        <br>
+        <div>
+            <button id="insert-table">Вставить таблицу</button>
+            <button id="insert-row-above">Вставить строку выше</button>
+            <button id="insert-row-below">Вставить строку ниже</button>
+            <button id="insert-column-left">Вставить колонку слева</button>
+            <button id="insert-column-right">Вставить колонку справа</button>
+            <button id="delete-row">Удалить строку</button>
+            <button id="delete-column">Удалить колонку</button>
+            <button id="delete-table">Удалить таблицу</button>
+        </div>
+        <div id="editor">
+            {% include 'guidebooks/'+str(book_id)+'/entries/'+str(entry_id)+'/contents.html' %}
+        </div>
+        <script src="../static/js/edit_entry.js"></script>
+        <input type="submit" value="Сохранить" onclick="setHTML()">
+        <input type="submit" value="Сохранить без содержимого" onclick="saveEmptyContents()">
+        <input type="button" onclick="location.href='{{ url_for('constructor') }}?b={{ book_id }}'" value="Вернуться">
+		<input type="button" onclick="location.href='{{ url_for('guidebook') }}?b={{ book_id }}#{{entry_id}}'" value="Открыть в пособии">
+    {% endmacro %}
+</head>
+<body>
+<div id="main">
+    {{ topmenu.create_topmenu(true, user) }}
+    {{ flashes.create_flashes_list() }}
+    {% set entry_n = len(entries) %}
+    {% set entry_i = {'value' : -1} %}
+    {% for j in range(entry_n) %}
+        {% if str(entries.loc[j, "entry_id"]) == str(entry_id) %}
+            {% if entry_i.update({'value' : j}) %}{% endif %}
+        {% endif %}
+    {% endfor %}
+    {% if entries.loc[entry_i['value'], "entry_type_name"] == 'none' %}
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id=form_rule method="post">
+            <input type="hidden" name="add_rule" value=1>
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="entry_name" value="Новое правило">
+            <input type="hidden" name="entry_type" value="rule">
+            <input type="submit" value="Создать правило">
+        </form>
+        <form action="{{url_for('edit_entry')}}?b={{ book_id }}&e={{ entry_id }}" id=form_task method="post">
+            <input type="hidden" name="add_task" value=1>
+			<input type="hidden" name="book_id" value="{{ book_id }}">
+            <input type="hidden" name="entry_id" value="{{ entry_id }}">
+            <input type="hidden" name="entry_name" value="Новое задание">
+            <input type="hidden" name="entry_type" value="task">
+            <select name="task_type">
+                <option value="text">Текстовое поле</option>
+                <option value="txar">Эссе</option>
+                <option value="numb">Число</option>
+                <option value="chbx">Несколько вариантов</option>
+                <option value="radi">Один вариант</option>
+                <option value="audi">Говорение</option>
+                <option value="diag">Диалог</option>
+                <option value="ordr">Порядок высказываний</option>
+            </select>
+            <input type="submit" value="Создать задание">
+        </form>
+    {% elif entries.loc[entry_i['value'], "entry_type_name"] == 'rule'
+            or entries.loc[entry_i['value'], "entry_type_name"] == 'rule_nic' %}
+        {{ create_file_control(images, videos, audios) }}
+        {{ create_form_edit(entries.loc[entry_i['value'], "entry_type_name"]) }}
+    {% else %}
+        {{ create_file_control(images, videos, audios) }}
+        {{ create_form_edit(entries.loc[entry_i['value'], "entry_type_name"]) }}
+    {% endif %}
+</div>
+</body>

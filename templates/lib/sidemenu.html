@@ -1,0 +1,28 @@
+{% macro create_sidemenu(book_id, lessons, rules, len, rule_info) %}
+    {% set lesson_n = len(lessons) %}
+    {% set rule_info_n = len(rule_info) %}
+    {% set rule_n = len(rules) %}
+<script src="../static/js/sidemenu.js"></script>
+<div id="sidemenuContents" class="sidemenu color-main">
+    <!--<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>-->
+    <ul>
+        <li><a href="javascript:void(0)">Пособие</a>
+            <ul id="listBook">
+                {% for i in range(lesson_n) %}
+                    <li><a href="{{url_for('guidebook')}}?b={{ book_id }}&l={{ lessons.loc[i,"lesson_id"] }}">
+                        {{ lessons.loc[i,"lesson_name"] }}</a></li>
+                    {% for j in range(rule_info_n) %}
+                        {% if rule_info.loc[j,"lesson_id"] == lessons.loc[i,"lesson_id"]
+                                and rule_info.loc[j,"in_contents_main"] == 'True' %}
+                            <li><a class="sidemenu-href" href="{{url_for('guidebook')}}?b={{ book_id }}&l={{ lessons.loc[i,"lesson_id"] }}#{{ rule_info.loc[j,"entry_id"] }}">
+                        {{ rule_info.loc[j,"entry_name"] }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+</div>
+{% endmacro %}

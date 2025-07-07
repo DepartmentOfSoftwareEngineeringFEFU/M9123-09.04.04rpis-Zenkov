@@ -1,0 +1,24 @@
+<html>
+<head>
+    <title>Вход - Спорки</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% import 'lib/topmenu.html' as topmenu %}
+    {% import 'lib/flashes.html' as flashes %}
+</head>
+<body>
+{{ flashes.create_flashes_list() }}
+<div id="main">
+    <form class="form-login" method="POST" action="/login_post">
+        <div class="login-field">
+        <label for="inputLogin">Логин</label>
+        <input class="login-input" id="inputLogin" type="text" name="login" placeholder="Введите логин" autofocus="" autocomplete='off'><br>
+        <label for="inputPsw">Пароль</label>
+        <input class="login-input" id="inputPsw" type="password" name="password" placeholder="Введите пароль" autofocus="" autocomplete='off'><br>
+        <label for="rememberMe">Запомнить:</label>
+        <input id="rememberMe" type="checkbox" name="remember" autofocus=""><br>
+        <input type="submit" value="Войти">
+        </div>
+    </form>
+</div>
+</body>

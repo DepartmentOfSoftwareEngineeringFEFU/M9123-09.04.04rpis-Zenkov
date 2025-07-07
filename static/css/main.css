@@ -1,0 +1,855 @@
+:root {
+  --bg-even: #fafafa;
+  --bg-odd: #ededed;
+}
+
+.bookLink {
+    border-radius: 5px;
+    background-color: #2276b4;
+    font-family: Helvetica;
+    font-weight: bold;
+    font-size: 15px;
+    color: white;	
+	width: 100%;
+	height: 50px;
+}
+
+.entry {
+	background-color: var(--bg-even);
+	margin-right: 0px;
+	padding: 15px;
+	padding-bottom: 50px;
+}
+
+.entry:nth-child(odd) {
+	background-color: var(--bg-odd);
+}
+
+.commentSection .messagesList {
+	max-height: 200px;
+}
+
+.commentSection {
+	background-color: #ddd;
+	border-radius: 15px;
+	border: 3px solid #298ed7;
+	width: 500px;
+	min-height: 150px;
+	overflow: hidden;
+	position: relative;
+}
+
+.commentInput {
+	width: 100%;
+	height: 90px;
+	overflow: hidden;
+}
+
+.commentInput textarea {
+	width: 100%;
+	height: 55%;
+	resize: none;
+}
+
+.commentInput input {
+	width: 100%;
+	height: 45%;
+}
+
+input[type='number']{
+    width: 50px;
+} 
+
+.entry input[type='submit']{
+    margin-bottom: 10px;
+} 
+
+.editorTextInput {
+	resize: both;
+}
+
+.listWindow {
+	margin-top: 40px;
+	position: fixed;
+	background-color: #ddd;
+	border-radius: 15px;
+	border: 3px solid #298ed7;
+	width: 75%;
+	height: 50%;
+	overflow: hidden;
+	z-index: 5;
+}
+
+.chatWindow {
+	position: fixed;
+	background-color: #ddd;
+	border-radius: 15px;
+	border: 3px solid #298ed7;
+	width: 400px;
+	height: 300px;
+	z-index: 5;
+	right: 0;
+	bottom: 40px;
+	overflow: hidden;
+}
+
+.chatButton {
+	position: fixed;
+	z-index: 5;
+	right: 0;
+	bottom: 5px;
+}
+
+.messagesList {
+	width: 100%;
+	height: 70%;
+	overflow: hidden;
+	overflow-y: auto;
+}
+
+.messageAuthor {
+	margin-right: 10px;
+	line-height: 0px;
+}
+
+.messageTime {
+	margin-right: 10px;
+	font-size: 10px;
+	line-height: 0px;
+}
+
+.chatMessage {
+	padding-bottom: 10px;
+	background-color: #ccc;
+}
+
+.chatMessage:nth-child(odd) {
+	background-color: #bbb;
+}
+
+.chatInput {
+	width: 100%;
+	height: 30%;
+	overflow: hidden;
+}
+
+.chatInput textarea {
+	width: 100%;
+	height: 55%;
+	resize: none;
+}
+
+.chatInput input {
+	width: 100%;
+	height: 45%;
+}
+
+.list {
+	display: inline-block;
+	float: left;
+	width: 30%;
+	height: 100%;
+	background-color: #ddd;
+	overflow: hidden;
+	overflow-y: scroll;
+}
+.listContent {
+	display: inline-block;
+	float: right;
+	width: 70%;
+	height: 100%;
+	overflow: auto;
+}
+
+
+.listWord {
+	float: left;
+	width: 100%;
+	padding-left: 10px;
+	padding-right: 30px;
+	padding-bottom: 0px;
+	padding-top: 0px;
+	min-height: 30px;
+	background-color: #ccc;
+	transition: 0.3s;
+	word-break: break-word;
+	font-size: 14px;
+}
+
+.listWord:nth-child(odd) {
+	background-color: #bbb;
+	transition: 0.3s;
+}
+
+.listWord:hover {
+	background-color: #aaa;
+	transition: 0.3s;
+	cursor: pointer;
+}
+
+.listWord[selected=''] {
+	background-color: #298ed7;
+}
+
+.row:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.popup {
+	display: none;
+	position: absolute;
+	background-color: #d2e6fc;
+	border-radius: 15px;
+	border: 3px solid #298ed7;
+	padding: 5px;
+	width: 50%;
+	max-height: 50%;
+	overflow: auto;
+	z-index: 5;
+}
+
+.popup .videoplayer, img {
+	max-width: 100%;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.videoplayer video::cue{
+	visibility: hidden;
+}
+
+.videoplayer {
+	width: 50%;
+	position: relative;
+}
+
+.videoplayer .subtitles {
+	position:absolute;
+    bottom:50px;
+    left:0;
+	right:0;
+    z-index:1;
+	margin-inline: auto; 
+	width: fit-content;
+	
+	background-color: rgba(210, 230, 252, .75);
+	border-radius: 15px;
+	padding: 10px;
+	
+	font-family: Helvetica;
+    font-size: 17px;
+	text-align: center;
+	
+	visibility: hidden;
+}
+
+.videoplayer video {
+	width: 100%; 
+	z-index: 0;
+}
+
+/* Main (blue) */
+.color-main {
+    background-color: #298ed7;
+    color: white;
+    vertical-align: center;
+}
+
+/* Off-color (slightly dark white)*/
+.color-off, .lesson_table.lesson_contents, .lesson_table.lesson_contents table {
+    background-color: #f1f1f1;
+    color: black;
+}
+
+.dialog-content {
+    border-radius: 10px;
+}
+
+.menu, .sidemenu {
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+/* Input (darker blue) */
+.menu a, main input {
+    background-color: #2276b4;
+    border-radius: 5px;
+    color: white;
+}
+
+.sidemenu a:hover {
+    background-color: #2276b4;
+}
+
+input[type='button'], input[type='submit'], input[type='file'], button {
+    border-radius: 5px;
+    background-color: #2276b4;
+    font-family: Helvetica;
+    font-weight: bold;
+    font-size: 15px;
+    color: white;
+}
+
+input[type='button'], input[type='submit'], input[type='file'], input[type="file"]::file-selector-button, button {
+    min-width: 100px;
+    min-height: 30px;
+}
+
+/* Input hover (dark blue) */
+.menu a:hover, input[type='button']:hover, input[type='submit']:hover, button:hover, input[type='file']:hover {
+    background-color: #1d659a;
+}
+
+/* Input text color */
+input[type='text'], input[type='password'], input[type='number'] {
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    color: black;
+}
+
+input, button, input[type='file']::file-selector-button {
+    transition: 0.3s;
+}
+
+/* Cursor style */
+input[type='button']:hover, input[type='submit']:hover, label:hover, select:hover, button:hover {
+    cursor: pointer;
+}
+
+input[type='text']:hover, input[type='password']:hover, input[type='number']:hover {
+    cursor: text;
+}
+
+/* Login field */
+.login-field {
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    width: 250px;
+}
+
+.login-input, #inputLogin, #inputPsw {
+    background-color: white;
+    color: black;
+}
+
+.login-input, #inputLogin, #inputPsw, .form-login input[type='submit'] {
+    width: 250px;
+    height: 50px;
+}
+
+.form-login input[type='text'], .form-login input[type='password'], .form-login input[type='submit'] {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+h1 {
+	margin: 15px;
+	margin-top: 60px;
+}
+
+/* Main text */
+h1, h2 {
+    font-family: Helvetica;
+}
+
+p, table, span, li, label {
+    font-family: Helvetica;
+    font-size: 17px;
+    line-height: 30px;
+}
+
+input[type='button'], input[type='submit'], input[type='file'], input[type='text'], input[type='number'], button {
+    height: 30px;
+}
+
+input[type='button'], input[type='submit'], input[type='text'], input[type='password'], input[type='number'], input[type='file'], textarea, .ql-editor, select {
+    font-family: Helvetica;
+    font-size: 17px;
+}
+
+li {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+li[data-list='bullet'] {
+    list-style-type: '•';
+    padding-inline-start: 1ch;
+}
+
+li[data-list='bullet']::marker {
+    font-size: 20px;
+}
+
+li[data-list='ordered'] {
+    padding-inline-start: 1ch;
+}
+
+li[data-list='ordered']::marker {
+    font-size: 20px;
+}
+
+.ql-align-justify {
+    text-align: justify;
+}
+
+.ql-align-center {
+    text-align: center;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.ql-align-right {
+    text-align: right;
+}
+
+.ql-video {
+    width: 75%;
+}
+
+.resize-vertical {
+    resize: vertical;
+}
+
+.resize-none {
+    resize: none;
+}
+
+.fullwidth {
+    width: 100%;
+}
+
+.no-border, .no-border th, .no-border td {
+    border: 0px none;
+}
+
+ /* Dialog window */
+.dialog {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 2; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.dialog-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.audio-player-default {
+    visibility: hidden;
+}
+
+.menu, .table-constructor {
+    width: 100%;
+}
+
+.table-constructor {
+    word-break: keep-all;
+}
+
+.table-constructor input,
+.table-constructor select
+{
+    width: 100%;
+    height: 50px;
+    display:inline-block;
+    position:relative;
+}
+
+.table-constructor form {
+	margin: 0px;
+}
+
+table:not(.table-constructor) {
+    width: 100%;
+    border-style: none;
+    white-space: break-spaces;
+    word-break: keep-all;
+}
+
+table.no-border {
+    word-break: break-word;
+}
+
+.table-ordr tbody tr td:first-child, .table-ordr input[type='button'] {
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  word-break: break-all;
+}
+
+.table-ordr input[type='button'] {
+    height: 40px;
+}
+
+iframe {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    aspect-ratio: 16 / 9;
+}
+
+img:not(.img-no-border), ql-video {
+    border: 3px solid #c2c2c2;
+    border-radius: 2px;
+    box-shadow: 4px 5px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    max-width: 100%;
+}
+
+#sidemenuContents {
+    box-shadow: 4px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.menu {
+    position: fixed; /* Set the navbar to fixed position */
+    top: 0; /* Position the navbar at the top of the page */
+	left: 30px;
+    z-index: 10;
+    margin-left: -30px;
+}
+
+.entry-title {
+	margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 150%;
+}
+
+.title-center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title-small {
+    font-size: 20px;
+}
+
+.table-constructor input[type='button'],
+.table-constructor input[type='submit'] {
+    white-space: break-spaces;
+}
+
+.table-constructor {
+    margin-bottom: 40px;
+}
+
+table {
+    margin-bottom: 10px;
+}
+
+table:not(.table-constructor) {
+    white-space: break-spaces;
+}
+
+table img {
+    display: block;
+    object-fit: scale-down;
+    position: relative;
+    width: 85%;
+    max-width: 500px;
+}
+
+table.with-image, table.with-image img {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+table.table-constructor td {
+    vertical-align: center;
+}
+
+table.with-image td {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    vertical-align: bottom;
+}
+
+table.with-image input[type='text'] {
+    max-width: 70%;
+}
+
+.menu li {
+    display: inline-block;
+    vertical-align: top;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.menu a {
+    display: block;
+    height: 40px;
+    line-height: 40px;
+    width: 125px;
+    text-decoration: none; /* Убирает подчеркивание для ссылок */
+    text-align: center;
+    transition: background-color 0.3s;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+    float: left;
+    margin: 5px;
+}
+
+.active, input, select, option {
+    transition: 0.3s;
+}
+
+.menu a:disabled {
+    cursor: none;
+}
+
+#sidemenuContents ul ul li a {
+    white-space: pre-line;
+    text-align: left;
+    font-size: 18px;
+	padding-top: 0px;
+}
+
+input[type='text'], input[type='number'], input[type='password'] {
+    cursor: text;
+}
+
+.topmenu-right {
+    float: right;
+    margin-right: 0px;
+}
+
+.active a:visited{
+    color: #f8f8f8;
+}
+
+.block {
+    padding: 10px 20px;
+}
+
+.inline_block  {
+    display: inline-block;
+    vertical-align:top;
+    margin: 10px;
+}
+
+.input_fullwidth {
+    width: 100%;
+}
+
+/* The side navigation menu */
+.sidemenu {
+    height: 100%; /* 100% Full-height */
+    width: 0; /* 0 width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 9; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    overflow-x: scroll; /* Disable horizontal scroll */
+    text-wrap: normal;
+    word-wrap: anywhere;
+    padding-top: 60px; /* Place content 60px from the top */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+
+/* The navigation menu links */
+.sidemenu a, li::marker {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #f8f8f8;
+    display: block;
+    transition: 0.3s;
+    white-space: nowrap;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.sidemenu li li a{
+    font-size: 15px;
+    word-wrap: break-word;
+}
+
+#openbtn {
+    font-size: 15px;
+    width: 50px;
+}
+
+.sidemenu ul, ul ul {
+    display: inline-block;
+    width: 100%;
+}
+
+.sidemenu ul ul {
+    display: none;
+}
+
+.sidemenu ul {
+    padding: 0;
+    transition: 0.3s;
+}
+
+.sidemenu li li a {
+    padding-left: 50px;
+}
+
+/* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+#main {
+    transition: margin-left .5s;
+    margin-top: 50px; /* Add a top margin to avoid content overlay */
+}
+
+.table-constructor tr:first-child td {
+    /* background-color:#ebbd63;
+    color: #f8f8f8; */
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.table-constructor, .table-constructor th, td {
+    border: solid #d6d4d4;
+}
+
+table:not(.table-constructor), th:not(.table-constructor), td:not(.table-constructor) {
+    word-wrap: break-word;
+}
+
+table {
+    table-layout:fixed;
+    float: right;
+    display: table;
+}
+
+#main li::marker {
+    color: black;
+}
+
+.flashes {
+    padding-left: 0;
+    list-style-type: none;
+    text-align: center;
+    color: white;
+    box-shadow: 4px 5px 10px rgba(0, 0, 0, 0.4);
+}
+
+.flashes .error,
+.flashes .success,
+.flashes .warning{
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.flashes .error {
+    background-color: #e44646;
+}
+
+.flashes .success {
+    background-color: #46e446;
+}
+
+.flashes .warning {
+    background-color: #e4ac44;
+}
+
+*:disabled, *:disabled+label {
+    pointer-events: none;
+}
+
+input:disabled {
+    color: black;
+    background-color: white;
+}
+
+#divScreenTurn {
+    display: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#divScreenTurn img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 45%;
+}
+
+@media only screen and (max-width: 1000px) {
+    .table-constructor input[type='button'],
+    .table-constructor input[type='submit']
+    {
+        font-size: 14px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+	.commentSection {
+		width: 100%;
+	}
+    table {
+        font-size: 15px;
+    }
+    .menu a {
+        width: 70px;
+        margin: 3px;
+		font-size: 13px;
+    }
+	.listWord
+    {
+        font-size: 5px;
+    }
+    #hrefConstructor, #hrefControlPanel {
+        display: none;
+    }
+    #lesson_table, #users_table, #groups_table {
+        display: none;
+    }
+    #divScreenTurn {
+        display: block;
+    }
+    table img {
+        width: 95%;
+    }
+    table.no-border input[type='text'] {
+        font-size: 15px;
+    }
+    .ql-video {
+        width: 100%;
+    }
+	.videoplayer {
+		width: 100%;
+	}
+	.listWindow {
+		width: 95%
+	}
+}
+
+@media only screen and (orientation: portrait) {
+    .menu {
+        border-radius: 10px;
+    }
+}
